@@ -9,13 +9,14 @@ const startPauseBt = document.querySelector('#start-pause')
 const musicaFocoInput = document.querySelector('#alternar-musica')
 const iniciarOuPausarBt = document.querySelector('#start-pause span')
 const imagemButton = document.querySelector('.app__card-primary-butto-icon')
+const tempoNaTela = document.querySelector('#timer')
 
 const musica = new Audio('/sons/luna-rise-part-one.mp3')
 const playAudio = new Audio('/sons/play.wav')
 const pauseAudio = new Audio('/sons/pause.mp3')
 const endAudio = new Audio('/sons/beep.mp3')
 
-let tempoDecorridoEmSegundos = 5
+let tempoDecorridoEmSegundos = 1500 
 let intervaloId = null
 
 musica.loop = true
@@ -29,21 +30,25 @@ musicaFocoInput.addEventListener('change', () => {
 })
 
 focoBt.addEventListener('click', () => {
+   tempoDecorridoEmSegundos = 1500
    alterarContexto('foco')
    focoBt.classList.add('active')
 })
 
 curtoBt.addEventListener('click', () => {
+    tempoDecorridoEmSegundos = 300
     alterarContexto('descanso-curto')
     curtoBt.classList.add('active')
 })
 
 longoBt.addEventListener('click', () => {
-   alterarContexto('descanso-longo')
-   longoBt.classList.add('active')
+    tempoDecorridoEmSegundos = 900
+    alterarContexto('descanso-longo')
+    longoBt.classList.add('active')
 })
 
 function alterarContexto(contexto) {
+    mostrarTimer()
     buttons.forEach(contexto => {contexto.classList.remove('active')})
     html.setAttribute('data-contexto', contexto)
     banner.setAttribute('src', `/imagens/${contexto}.png`)
@@ -71,13 +76,13 @@ function alterarContexto(contexto) {
 
 const contagemRegressiva = () => {
     if (tempoDecorridoEmSegundos <= 0) {
-       // endAudio.play()
+        endAudio.play()
         alert('Tempo esgotado!')
         zerar()
         return
     }
     tempoDecorridoEmSegundos -= 1
-    console.log('Temporizador: ' + tempoDecorridoEmSegundos)
+    mostrarTimer()
 }
 
 startPauseBt.addEventListener('click', iniciarOuPausar)
@@ -100,3 +105,11 @@ function zerar() {
     intervaloId = null
     imagemButton.setAttribute('src', '/imagens/play_arrow.png')
 }
+
+function mostrarTimer() {
+    const tempo = new Date(tempoDecorridoEmSegundos * 1000)
+    const tempoFormatado = tempo.toLocaleString('pt-BR', { minute: '2-digit', second: '2-digit' })
+    tempoNaTela.innerHTML = `${tempoFormatado}`
+}
+
+mostrarTimer()
