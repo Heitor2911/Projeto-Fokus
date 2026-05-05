@@ -7,6 +7,12 @@ const ulTasks = document.querySelector('.app__section-task-list')
 // Carrega as tarefas salvas no localStorage. Caso não haja nenhuma, inicia com um array vazio
 const tasks = JSON.parse(localStorage.getItem('tarefas')) || []
 
+// Atualiza/Salva as tarefas no LocalStorage
+function saveLocalStorage() { 
+    localStorage.setItem('tarefas', JSON.stringify(tasks))
+}
+
+
 function createElementTask(tarefa) {
     
     // Cria o item da lista e adiciona a classe de estilo
@@ -30,6 +36,19 @@ function createElementTask(tarefa) {
     // Cria o botão de edição com seu ícone
     const button = document.createElement('button')
     button.classList.add('app_button-edit')
+
+    // Manipula os elementos button e paragrafo para a edição de alguma tarefa
+    button.onclick = () => {
+        const novaDescricao = prompt("Qual é o novo nome da tarefa?")
+        console.log("Descrição da nova tarefa:", novaDescricao)
+       
+        // Caso a tarefa passe com valor vazio/ou seja cancelada o valor não sera atualizado
+        if (novaDescricao) {
+            paragrafo.textContent = novaDescricao
+            tarefa.descricao = novaDescricao
+            saveLocalStorage()
+        }
+    }
 
     const imageButton = document.createElement('img')
     imageButton.setAttribute('src', '/imagens/edit.png')
@@ -63,7 +82,7 @@ formAddTask.addEventListener('submit', (event)  => {
     ulTasks.append(taskElement)
      
     // Salva o array atualizado no localStorage
-    localStorage.setItem('tarefas', JSON.stringify(tasks))
+    saveLocalStorage()
     
     // Limpa o campo de texto e esconde o formulário
     textArea.value = ''
