@@ -1,3 +1,4 @@
+// Seleciona os elementos utilizados na aplicação
 const html = document.querySelector('html');
 const focoBt = document.querySelector('.app__card-button--foco')
 const curtoBt = document.querySelector('.app__card-button--curto')
@@ -11,16 +12,22 @@ const iniciarOuPausarBt = document.querySelector('#start-pause span')
 const imagemButton = document.querySelector('.app__card-primary-butto-icon')
 const tempoNaTela = document.querySelector('#timer')
 
+// Inicializa os arquivos de áudio utilizados na aplicação
 const musica = new Audio('/sons/luna-rise-part-one.mp3')
 const playAudio = new Audio('/sons/play.wav')
 const pauseAudio = new Audio('/sons/pause.mp3')
 const endAudio = new Audio('/sons/beep.mp3')
 
+// Tempo inicial em segundos (1500s = 25 minutos, padrão do modo foco)
 let tempoDecorridoEmSegundos = 1500 
+
+// Armazena o ID do intervalo ativo. Quando nulo, indica que o timer está pausado
 let intervaloId = null
 
+// Define a música de fundo para tocar em loop contínuo
 musica.loop = true
 
+// Alterna a reprodução da música de fundo conforme o estado do checkbox
 musicaFocoInput.addEventListener('change', () => {
     if (musica.paused) {
         musica.play()
@@ -29,18 +36,21 @@ musicaFocoInput.addEventListener('change', () => {
     }
 })
 
+// Define o contexto para "foco" (25 minutos) ao clicar no botão correspondente
 focoBt.addEventListener('click', () => {
    tempoDecorridoEmSegundos = 1500
    alterarContexto('foco')
    focoBt.classList.add('active')
 })
 
+// Define o contexto para "descanso curto" (5 minutos) ao clicar no botão correspondente
 curtoBt.addEventListener('click', () => {
     tempoDecorridoEmSegundos = 300
     alterarContexto('descanso-curto')
     curtoBt.classList.add('active')
 })
 
+// Define o contexto para "descanso longo" (15 minutos) ao clicar no botão correspondente
 longoBt.addEventListener('click', () => {
     tempoDecorridoEmSegundos = 900
     alterarContexto('descanso-longo')
@@ -49,6 +59,7 @@ longoBt.addEventListener('click', () => {
 
 function alterarContexto(contexto) {
     mostrarTimer()
+    // Remove a classe 'active' de todos os botões antes de ativar o novo contexto
     buttons.forEach(contexto => {contexto.classList.remove('active')})
     html.setAttribute('data-contexto', contexto)
     banner.setAttribute('src', `/imagens/${contexto}.png`)
@@ -78,6 +89,12 @@ const contagemRegressiva = () => {
     if (tempoDecorridoEmSegundos <= 0) {
         endAudio.play()
         alert('Tempo esgotado!')
+        // Dispara um evento customizado ao finalizar um ciclo de foco
+        const focoAtivo = html.getAttribute('data-contexto') == 'foco'
+        if (focoAtivo) {
+            const evento  = new CustomEvent('FocoFinalizado')
+            document.dispatchEvent(evento)
+        }
         zerar()
         return
     }
@@ -112,4 +129,5 @@ function mostrarTimer() {
     tempoNaTela.innerHTML = `${tempoFormatado}`
 }
 
+// Exibe o timer na tela assim que a página é carregada
 mostrarTimer()

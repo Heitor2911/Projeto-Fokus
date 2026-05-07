@@ -3,9 +3,12 @@ const btnAddTask = document.querySelector('.app__button--add-task')
 const formAddTask = document.querySelector('.app__form-add-task')
 const textArea = document.querySelector('.app__form-textarea')
 const ulTasks = document.querySelector('.app__section-task-list')
+const paragraphDescriptionTask = document.querySelector('.app__section-active-task-description')
 
 // Carrega as tarefas salvas no localStorage. Caso não haja nenhuma, inicia com um array vazio
 const tasks = JSON.parse(localStorage.getItem('tarefas')) || []
+let activeTask = null // Variável para armazenar a tarefa ativa atualmente selecionada
+let liActiveTask = null // Variável para armazenar o elemento <li> da tarefa ativa atualmente selecionada
 
 // Atualiza/Salva as tarefas no LocalStorage
 function saveLocalStorage() { 
@@ -59,6 +62,25 @@ function createElementTask(tarefa) {
     li.append(paragrafo)
     li.append(button)
 
+    // Adiciona o evento de clique para exibir a tarefa ativa
+    li.onclick = () => {
+        document.querySelectorAll('.app__section-task-list-item-active')
+            .forEach(element => {
+                element.classList.remove('app__section-task-list-item-active')
+            })
+        if (activeTask === tarefa) {
+            paragraphDescriptionTask.textContent = ''
+            activeTask = null
+            liActiveTask = null
+            return
+        }
+        activeTask = tarefa
+        liActiveTask = li
+        paragraphDescriptionTask.textContent = tarefa.descricao
+        
+        li.classList.add('app__section-task-list-item-active')
+    }
+
     return li
 }
 
@@ -93,4 +115,13 @@ formAddTask.addEventListener('submit', (event)  => {
 tasks.forEach(tarefa => {
     const taskElement = createElementTask(tarefa)
     ulTasks.append(taskElement)
+})
+
+// Adiciona um ouvinte para o evento personalizado 'FocoFinalizado' para marcar a tarefa ativa como concluída
+document.addEventListener('FocoFinalizado', () => {
+    if (activeTask && liActiveTask) {
+        liActiveTask.classList.remove('app__section-task-list-item-active')
+        liActiveTask.classList.add('app__section-task-list-item-complete')
+        liActiveTask.querySelector('button').setAttribute('disabled', 'disabled') //desativa o botão de edição da tarefa
+    }
 })
