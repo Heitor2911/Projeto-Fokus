@@ -19,7 +19,7 @@ const pauseAudio = new Audio('/sons/pause.mp3')
 const endAudio = new Audio('/sons/beep.mp3')
 
 // Tempo inicial em segundos (1500s = 25 minutos, padrão do modo foco)
-let tempoDecorridoEmSegundos = 1500 
+let tempoDecorridoEmSegundos = 15
 
 // Armazena o ID do intervalo ativo. Quando nulo, indica que o timer está pausado
 let intervaloId = null
