@@ -5,8 +5,12 @@ const textArea = document.querySelector('.app__form-textarea')
 const ulTasks = document.querySelector('.app__section-task-list')
 const paragraphDescriptionTask = document.querySelector('.app__section-active-task-description')
 
+// Seleciona o botão para remover tarefas concluídas
+const btnremoveComplete = document.querySelector('#btn-remover-concluidas')
+const btnremoveAll = document.querySelector('#btn-remover-todas')
+
 // Carrega as tarefas salvas no localStorage. Caso não haja nenhuma, inicia com um array vazio
-const tasks = JSON.parse(localStorage.getItem('tarefas')) || []
+let tasks = JSON.parse(localStorage.getItem('tarefas')) || []
 let activeTask = null // Variável para armazenar a tarefa ativa atualmente selecionada
 let liActiveTask = null // Variável para armazenar o elemento <li> da tarefa ativa atualmente selecionada
 
@@ -62,24 +66,30 @@ function createElementTask(tarefa) {
     li.append(paragrafo)
     li.append(button)
 
-    // Adiciona o evento de clique para exibir a tarefa ativa
-    li.onclick = () => {
-        document.querySelectorAll('.app__section-task-list-item-active')
-            .forEach(element => {
-                element.classList.remove('app__section-task-list-item-active')
-            })
-        if (activeTask === tarefa) {
-            paragraphDescriptionTask.textContent = ''
-            activeTask = null
-            liActiveTask = null
-            return
+    if (tarefa.completa) {
+        li.classList.add('app__section-task-list-item-complete')
+        button.setAttribute('disabled', 'disabled')
+    } else {
+        // Adiciona o evento de clique para exibir a tarefa ativa
+        li.onclick = () => {
+            document.querySelectorAll('.app__section-task-list-item-active')
+                .forEach(element => {
+                    element.classList.remove('app__section-task-list-item-active')
+                })
+            if (activeTask === tarefa) {
+                paragraphDescriptionTask.textContent = ''
+                activeTask = null
+                liActiveTask = null
+                return
+            }
+            activeTask = tarefa
+            liActiveTask = li
+            paragraphDescriptionTask.textContent = tarefa.descricao
+            
+            li.classList.add('app__section-task-list-item-active')
         }
-        activeTask = tarefa
-        liActiveTask = li
-        paragraphDescriptionTask.textContent = tarefa.descricao
-        
-        li.classList.add('app__section-task-list-item-active')
     }
+
 
     return li
 }
@@ -123,5 +133,23 @@ document.addEventListener('FocoFinalizado', () => {
         liActiveTask.classList.remove('app__section-task-list-item-active')
         liActiveTask.classList.add('app__section-task-list-item-complete')
         liActiveTask.querySelector('button').setAttribute('disabled', 'disabled') //desativa o botão de edição da tarefa
+        activeTask.completa = true // Marca a tarefa como completa no objeto
+        saveLocalStorage() // Salva a atualização no localStorage
     }
 })
+
+const removeTasks = (somenteCompletas) => {
+    // Define o seletor para remover apenas as tarefas completas ou todas as tarefas, dependendo do parâmetro
+    let seletor = ".app__section-task-list-item"
+    if (somenteCompletas) {
+        seletor = ".app__section-task-list-item-complete"
+    }
+    document.querySelectorAll(seletor).forEach(element => {
+        element.remove()
+    })
+    tasks = somenteCompletas ?tasks.filter(tarefa => !tarefa.completa) : [] // Limpa o array de tarefas, mantendo apenas as incompletas se for para remover somente as completas
+    saveLocalStorage() // Salva a atualização no localStorage
+}
+
+btnremoveComplete.onclick = () => removeTasks(true)
+btnremoveAll.onclick = () => removeTasks(false)
